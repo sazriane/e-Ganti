@@ -3,125 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Guru Ganti Saz</title>
-    
-    <!-- Supabase & SheetJS (Untuk baca Excel) -->
+    <title>Sistem Pengurusan Guru Ganti</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap');
-        
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #fff0f5; /* Tona soft pink */
-            color: #5c4059;
-            padding: 20px;
-            margin: 0;
-        }
-        .container {
-            max-width: 700px;
-            margin: 0 auto 20px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(255, 182, 193, 0.3);
-            border: 2px dashed #ffb6c1;
-        }
-        h1, h2 {
-            text-align: center;
-            color: #ff8da1;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ffe4e1;
-            border-radius: 10px;
-            box-sizing: border-box;
-            font-family: 'Nunito', sans-serif;
-            font-size: 15px;
-        }
-        input:focus {
-            outline: none;
-            border-color: #ffb6c1;
-        }
-        button {
-            background-color: #ffb6c1;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            width: 100%;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #ff8da1;
-        }
-        .teacher-list {
-            margin-top: 30px;
-        }
-        .teacher-card {
-            background: #fff9fa;
-            padding: 15px;
-            border-radius: 12px;
-            border-left: 5px solid #ffb6c1;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-    </style>
 </head>
 <body>
-
-    <!-- KOTAK 1: Tambah Guru & Senarai Guru -->
-    <div class="container">
-        <h1>🌸 Pengurusan Guru 🌸</h1>
-        
-        <form id="addTeacherForm">
-            <div class="form-group">
-                <label for="teacherName">Nama Guru</label>
-                <input type="text" id="teacherName" placeholder="Contoh: Cikgu Aminah" required>
-            </div>
-            <div class="form-group">
-                <label for="maxPeriods">Had Maksimum Waktu Mengajar (Sehari)</label>
-                <input type="number" id="maxPeriods" value="8" required> 
-            </div>
-            <button type="submit">🎀 Tambah Guru</button>
-        </form>
-
-        <div class="teacher-list">
-            <h2>Senarai Guru Terkini</h2>
-            <div id="teacherContainer">
-                <!-- Data dari Supabase akan dipaparkan di sini -->
-            </div>
-        </div>
+    <div class="sidebar">
+        <h2>Admin Sekolah</h2>
+        <ul>
+            <li><a href="#" id="menu-jadual">Jadual Induk</a></li>
+            <li><a href="#" id="menu-guru">Senarai Guru</a></li>
+            <li><a href="#" id="menu-cuti">Urus Ketidakhadiran</a></li>
+            <li><a href="#" id="menu-cadangan">Cadangan Guru Ganti</a></li>
+        </ul>
     </div>
 
-    <!-- KOTAK 2: Muat Naik Jadual EXCEL -->
-    <div class="container">
-        <h2>📅 Muat Naik Jadual (Excel)</h2>
-        <p style="font-size: 14px; color: #888; text-align: center;">
-            Format lajur (baris pertama) MESTI mengikut ejaan ini: <br>
-            <b>Nama Guru, Hari, Waktu, Kelas, Subjek</b>
-        </p>
-        
-        <div class="form-group">
-            <!-- Tukar accept kepada fail excel -->
-            <input type="file" id="excelFile" accept=".xlsx, .xls" style="background: #fff9fa; padding: 15px;">
-        </div>
-        <button id="uploadExcelBtn">🚀 Proses & Simpan Jadual Excel</button>
+    <div class="main-content">
+        <header>
+            <h1>Sistem Pengurusan Guru Ganti (Relief)</h1>
+        </header>
+
+        <!-- Bahagian untuk memaparkan senarai guru dari pangkalan data -->
+        <section id="content-area">
+            <div class="card">
+                <h3>Senarai Guru</h3>
+                <button onclick="tambahGuruTest()">+ Tambah Guru Ujian</button>
+                <div id="senarai-guru-container">
+                    <p>Memuatkan data...</p>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="app.js"></script>
