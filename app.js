@@ -66,82 +66,93 @@ async function fetchTeachers() {
 fetchTeachers();
 
 
-// --- BAHAGIAN 2: MUAT NAIK JADUAL (CSV) ---
-const uploadCsvBtn = document.getElementById('uploadCsvBtn');
+// --- BAHAGIAN 2: MUAT NAIK JADUAL (EXCEL) ---
+const uploadExcelBtn = document.getElementById('uploadExcelBtn');
 
-uploadCsvBtn.addEventListener('click', async () => {
-    const fileInput = document.getElementById('csvFile');
+uploadExcelBtn.addEventListener('click', async () => {
+    const fileInput = document.getElementById('excelFile');
     
     if (!fileInput.files.length) {
-        alert('Sila pilih fail CSV dahulu! 🌸');
+        alert('Sila pilih fail Excel dahulu! 🌸');
         return;
     }
 
-    uploadCsvBtn.innerText = "Sedang memproses... ⏳";
+    uploadExcelBtn.innerText = "Sedang memproses... ⏳";
 
-    // Ambil senarai guru untuk padankan ID
+    // 1. Ambil senarai guru dari Supabase untuk tujuan padanan
     const { data: teachers, error: teacherError } = await supabase
         .from('teachers')
         .select('id, name');
 
     if (teacherError) {
         alert('Ralat mengambil senarai guru: ' + teacherError.message);
-        uploadCsvBtn.innerText = "🚀 Proses & Simpan Jadual";
+        uploadExcelBtn.innerText = "🚀 Proses & Simpan Jadual Excel";
         return;
     }
 
-    // Buat pemetaan nama ke ID
     const teacherMap = {};
     teachers.forEach(t => {
         teacherMap[t.name.toLowerCase().trim()] = t.id;
     });
 
-    // Baca CSV guna PapaParse
-    Papa.parse(fileInput.files[0], {
-        header: true,
-        skipEmptyLines: true,
-        complete: async function(results) {
-            const rows = results.data;
-            const timetablesToInsert = [];
-            let missingTeachers = [];
+    // 2. Baca fail Excel
+    const file = fileInput.files[0];
+    const reader = new FileReader();
 
-            for (let row of rows) {
-                const csvName = row['Nama Guru'] ? row['Nama Guru'].toLowerCase().trim() : '';
-                
-                if (teacherMap[csvName]) {
-                    timetablesToInsert.push({
-                        teacher_id: teacherMap[csvName],
-                        day_of_week: row['Hari'],
-                        period_number: parseInt(row['Waktu']),
-                        class_name: row['Kelas'],
-                        subject: row['Subjek']
-                    });
-                } else if (row['Nama Guru']) {
-                    if(!missingTeachers.includes(row['Nama Guru'])) {
-                        missingTeachers.push(row['Nama Guru']);
-                    }
-                }
-            }
+    reader.onload = async function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Ambil helaian (sheet) pertama sahaja
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Tukar helaian Excel kepada format Array JSON
+        const rows = XLSX.utils.sheet_to_json(worksheet);
 
-            if (timetablesToInsert.length > 0) {
-                const { error: insertError } = await supabase
-                    .from('timetables')
-                    .insert(timetablesToInsert);
+        const timetablesToInsert = [];
+        let missingTeachers = [];
 
-                if (insertError) {
-                    alert('Ralat menyimpan jadual: ' + insertError.message);
-                } else {
-                    alert(`Berjaya! 🎉 ${timetablesToInsert.length} slot jadual telah disimpan.`);
-                    if (missingTeachers.length > 0) {
-                        alert(`Nota: Guru ini tiada dalam sistem dan jadualnya diabaikan:\n${missingTeachers.join(', ')}`);
-                    }
-                    fileInput.value = ''; 
-                }
-            } else {
-                alert('Tiada data yang sah. Pastikan nama lajur CSV betul dan guru telah didaftarkan.');
-            }
+        // 3. Susun data
+        for (let row of rows) {
+            const excelName = row['Nama Guru'] ? String(row['Nama Guru']).toLowerCase().trim() : '';
             
-            uploadCsvBtn.innerText = "🚀 Proses & Simpan Jadual";
+            if (teacherMap[excelName]) {
+                timetablesToInsert.push({
+                    teacher_id: teacherMap[excelName],
+                    day_of_week: row['Hari'],
+                    period_number: parseInt(row['Waktu']),
+                    class_name: row['Kelas'],
+                    subject: row['Subjek']
+                });
+            } else if (row['Nama Guru']) {
+                if(!missingTeachers.includes(row['Nama Guru'])) {
+                    missingTeachers.push(row['Nama Guru']);
+                }
+            }
         }
-    });
+
+        // 4. Hantar ke Supabase
+        if (timetablesToInsert.length > 0) {
+            const { error: insertError } = await supabase
+                .from('timetables')
+                .insert(timetablesToInsert);
+
+            if (insertError) {
+                alert('Ralat menyimpan jadual: ' + insertError.message);
+            } else {
+                alert(`Berjaya! 🎉 ${timetablesToInsert.length} slot jadual telah disimpan.`);
+                if (missingTeachers.length > 0) {
+                    alert(`Nota: Guru ini tiada dalam sistem dan jadualnya diabaikan:\n${missingTeachers.join(', ')}`);
+                }
+                fileInput.value = ''; 
+            }
+        } else {
+            alert('Tiada data yang sah. Pastikan nama lajur Excel betul (Nama Guru, Hari, Waktu, Kelas, Subjek).');
+        }
+        
+        uploadExcelBtn.innerText = "🚀 Proses & Simpan Jadual Excel";
+    };
+
+    reader.readAsArrayBuffer(file);
 });
