@@ -1,23 +1,23 @@
-// Gantikan dengan URL dan Anon Key dari projek Supabase awak (Settings > API)
-const SUPABASE_URL = 'https://URL_SUPABASE_AWAK.supabase.co';
-const SUPABASE_ANON_KEY = 'ANON_KEY_SUPABASE_AWAK';
+// Konfigurasi Supabase
+const SUPABASE_URL = 'https://ftwatlxvmosbbbhystsy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0d2F0bHh2bW9zYmJiaHlzdHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MDA0MzgsImV4cCI6MjEwNDQ3NjQzOH0.YfpRFIyDMrhQqOfpA-32Ti--pl6a7gpRdVWxfcVnpS8';
 
-// Initialize Supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Uji sambungan (Kita cuba ambil senarai guru)
+// Fungsi untuk test sambungan (Panggil senarai guru)
 async function testConnection() {
-    const { data, error } = await supabase
+    console.log("Sedang menyambung ke pangkalan data...");
+    
+    let { data: teachers, error } = await supabase
         .from('teachers')
         .select('*');
         
     if (error) {
-        console.error('Ralat sambungan:', error.message);
+        console.error("Ralat sambungan:", error.message);
     } else {
-        console.log('Berjaya! Senarai Guru:', data);
+        console.log("Berjaya! Senarai guru:", teachers);
+        // Memandangkan database masih kosong, ia akan papar array kosong []
     }
 }
 
-// Jalankan ujian apabila halaman dimuat turun
 testConnection();
-
