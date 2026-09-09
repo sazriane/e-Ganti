@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Guru Ganti Saz</title>
+    
+    <!-- Supabase & PapaParse (Untuk baca CSV) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap');
         
@@ -17,14 +21,14 @@
         }
         .container {
             max-width: 700px;
-            margin: 0 auto;
+            margin: 0 auto 20px auto;
             background: white;
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 20px rgba(255, 182, 193, 0.3);
             border: 2px dashed #ffb6c1;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #ff8da1;
         }
@@ -80,6 +84,8 @@
     </style>
 </head>
 <body>
+
+    <!-- KOTAK 1: Tambah Guru & Senarai Guru -->
     <div class="container">
         <h1>🌸 Pengurusan Guru 🌸</h1>
         
@@ -102,6 +108,20 @@
                 <!-- Data dari Supabase akan dipaparkan di sini -->
             </div>
         </div>
+    </div>
+
+    <!-- KOTAK 2: Muat Naik Jadual CSV -->
+    <div class="container">
+        <h2>📅 Muat Naik Jadual (CSV)</h2>
+        <p style="font-size: 14px; color: #888; text-align: center;">
+            Format lajur MESTI mengikut ejaan ini: <br>
+            <b>Nama Guru, Hari, Waktu, Kelas, Subjek</b>
+        </p>
+        
+        <div class="form-group">
+            <input type="file" id="csvFile" accept=".csv" style="background: #fff9fa; padding: 15px;">
+        </div>
+        <button id="uploadCsvBtn">🚀 Proses & Simpan Jadual</button>
     </div>
 
     <script src="app.js"></script>
