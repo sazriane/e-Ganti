@@ -25,11 +25,32 @@
             <p>Urus jadual dan relif guru dengan mudah dan pantas.</p>
         </header>
 
-        <section class="card">
-            <h3>Status Hari Ini</h3>
-            <p>Belum ada data ketidakhadiran direkodkan untuk hari ini.</p>
+         <section class="card" id="senarai-guru-section">
+            <h3>Senarai & Tambah Guru 🌸</h3>
+            
+            <!-- Borang Tambah Guru -->
+            <form id="add-teacher-form">
+                <input type="text" id="teacher-name" placeholder="Nama Guru (Cth: Cikgu Ali)" required>
+                <input type="number" id="max-waktu" placeholder="Max Waktu Sehari (Cth: 6)" value="6" required>
+                <button type="submit">Tambah Guru ✨</button>
+            </form>
+
+            <!-- Jadual Paparan Guru -->
+            <div class="table-responsive">
+                <table id="teacher-table">
+                    <thead>
+                        <tr>
+                            <th>Nama Guru</th>
+                            <th>Max Waktu Sehari</th>
+                            <th>Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-list">
+                        <!-- Data dari Supabase akan dipaparkan di sini -->
+                    </tbody>
+                </table>
+            </div>
         </section>
-    </div>
 
     <script src="app.js"></script>
 </body>
