@@ -99,19 +99,61 @@ uploadExcelBtn.addEventListener('click', async () => {
     const file = fileInput.files[0];
     const reader = new FileReader();
 
-    reader.onload = async function(e) {
+        reader.onload = async function(e) {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        
-        // Ambil helaian (sheet) pertama sahaja
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // Tukar helaian Excel kepada format Array JSON
-        const rows = XLSX.utils.sheet_to_json(worksheet);
+        // Baca raw data
+        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        
+        console.log("Data Excel yang dibaca:", rows); // <-- INI AKAN BANTU KITA DEBUG
 
         const timetablesToInsert = [];
         let missingTeachers = [];
+
+        for (let row of rows) {
+            // Bersihkan nama lajur (buang space jika tertekan space dalam Excel)
+            const excelName = row['Nama Guru'] ? String(row['Nama Guru']).toLowerCase().trim() : '';
+            
+            if (teacherMap[excelName]) {
+                timetablesToInsert.push({
+                    teacher_id: teacherMap[excelName],
+                    day_of_week: row['Hari'] ? String(row['Hari']).trim() : '',
+                    period_number: parseInt(row['Waktu']) || 0,
+                    class_name: row['Kelas'] ? String(row['Kelas']).trim() : '',
+                    subject: row['Subjek'] ? String(row['Subjek']).trim() : ''
+                });
+            } else if (row['Nama Guru']) {
+                if(!missingTeachers.includes(row['Nama Guru'])) {
+                    missingTeachers.push(row['Nama Guru']);
+                }
+            }
+        }
+
+        console.log("Data sedia untuk disimpan:", timetablesToInsert);
+
+        if (timetablesToInsert.length > 0) {
+            const { error: insertError } = await supabase
+                .from('timetables')
+                .insert(timetablesToInsert);
+
+            if (insertError) {
+                alert('Ralat menyimpan jadual: ' + insertError.message);
+            } else {
+                alert(`Berjaya! 🎉 ${timetablesToInsert.length} slot jadual telah disimpan.`);
+                if (missingTeachers.length > 0) {
+                    alert(`Nota: Guru ini tiada dalam sistem dan jadualnya diabaikan:\n${missingTeachers.join(', ')}`);
+                }
+                fileInput.value = ''; 
+            }
+        } else {
+            alert('Tiada data yang sah. Pastikan nama lajur Excel betul dan guru telah didaftarkan (Sila semak Console untuk butiran).');
+        }
+        
+        uploadExcelBtn.innerText = "🚀 Proses & Simpan Jadual Excel";
+    };
 
         // 3. Susun data
         for (let row of rows) {
