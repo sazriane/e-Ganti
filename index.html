@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e-Ganti | Sistem Pengurusan Guru Ganti</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #1e293b;
+      --primary-accent: #0f172a;
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--primary);
+      color: white;
+      padding: 1.25rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+      color: var(--text-main);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #f8fafc;
+      color: var(--text-main);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #fff;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-print {
+      background: #334155;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.65rem;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    /* Print View */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      header, .no-print {
+        display: none !important;
+      }
+      .card {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header>
+    <div>
+      <h1>e-GANTI</h1>
+      <p>Sistem Pengurusan Guru Ganti Sekolah</p>
+    </div>
+    <button class="btn btn-print no-print" onclick="window.print()">Cetak Slip</button>
+  </header>
+
+  <!-- Bahagian 1: Catat Guru Tidak Hadir -->
+  <div class="card no-print">
+    <h2>1. Rekod Ketidakhadiran Guru</h2>
+    
+    <div class="form-group">
+      <label>Tarikh</label>
+      <input type="date" id="absentDate">
+    </div>
+
+    <div class="form-group">
+      <label>Nama Guru</label>
+      <select id="teacherSelect">
+        <option value="">-- Pilih Guru --</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Domain Ketidakhadiran</label>
+      <select id="domainSelect">
+        <option value="Tugas Rasmi">Tugas Rasmi (Mesyuarat / Taklimat / Bengkel)</option>
+        <option value="Cuti Sakit (MC)">Cuti Sakit (MC)</option>
+        <option value="Cuti Rehat Khas (CRK)">Cuti Rehat Khas (CRK)</option>
+        <option value="Cuti Kecemasan (EL)">Cuti Kecemasan (EL)</option>
+        <option value="Cuti Tanpa Rekod (CTR)">Cuti Tanpa Rekod (CTR) / Bersalin</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Catatan Spesifik (Pilihan)</label>
+      <textarea id="absenceRemarks" rows="2" placeholder="Contoh: Taklimat Kurikulum di PPD"></textarea>
+    </div>
+
+    <button class="btn btn-primary" onclick="submitAbsence()">Daftar Ketidakhadiran & Cari Ganti</button>
+  </div>
+
+  <!-- Bahagian 2: Senarai Kelas Perlu Guru Ganti Hari Ini -->
+  <div class="card">
+    <h2>
+      <span>Jadual Guru Ganti Hari Ini</span>
+      <span id="displayDate" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+    </h2>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Waktu</th>
+            <th>Kelas</th>
+            <th>Guru Asal & Alasan</th>
+            <th>Cadangan Guru Ganti (Lapang)</th>
+          </tr>
+        </thead>
+        <tbody id="reliefTableBody">
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--text-muted);">Tiada rekod ketidakhadiran hari ini.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 1. Konfigurasi Sambungan Supabase
+  const SUPABASE_URL = "https://ftwatlxvmosbbbhystsy.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0d2F0bHh2bW9zYmJiaHlzdHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MDA0MzgsImV4cCI6MjEwNDQ3NjQzOH0.YfpRFIyDMrhQqOfpA-32Ti--pl6a7gpRdVWxfcVnpS8";
+
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Tetapkan tarikh default hari ini
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('absentDate').value = today;
+  document.getElementById('displayDate').innerText = today;
+
+  // 2. Muat Turun Senarai Guru
+  async function loadTeachers() {
+    const { data, error } = await db.from('teachers').select('*').order('name');
+    if (error) return console.error(error);
+
+    const select = document.getElementById('teacherSelect');
+    select.innerHTML = '<option value="">-- Pilih Guru --</option>';
+    data.forEach(teacher => {
+      const opt = document.createElement('option');
+      opt.value = teacher.id;
+      opt.textContent = teacher.name;
+      select.appendChild(opt);
+    });
+  }
+
+  // 3. Simpan Ketidakhadiran & Paparkan Slot Terjejas
+  async function submitAbsence() {
+    const teacherId = document.getElementById('teacherSelect').value;
+    const date = document.getElementById('absentDate').value;
+    const domain = document.getElementById('domainSelect').value;
+    const remarks = document.getElementById('absenceRemarks').value;
+
+    if (!teacherId || !date) {
+      alert("Sila pilih guru dan tarikh terlebih dahulu.");
+      return;
+    }
+
+    const { error } = await db.from('absences').insert([
+      { teacher_id: teacherId, date: date, domain: domain, remarks: remarks }
+    ]);
+
+    if (error) {
+      alert("Ralat merekod ketidakhadiran: " + error.message);
+    } else {
+      alert("Ketidakhadiran berjaya direkod!");
+      document.getElementById('absenceRemarks').value = '';
+      loadReliefDashboard(date);
+    }
+  }
+
+  // 4. Papar Jadual Kelas yang Perlu Diganti
+  async function loadReliefDashboard(selectedDate) {
+    // Ambil senarai yang tidak hadir pada tarikh tersebut
+    const { data: absences, error } = await db
+      .from('absences')
+      .select('id, domain, remarks, teachers(id, name)')
+      .eq('date', selectedDate);
+
+    if (error || !absences || absences.length === 0) {
+      document.getElementById('reliefTableBody').innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align: center; color: var(--text-muted);">Tiada rekod ketidakhadiran hari ini.</td>
+        </tr>`;
+      return;
+    }
+
+    // Tukar format tarikh kepada kod hari (Mo, Tu, We, Th, Fr)
+    const dayMap = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const dayCode = dayMap[new Date(selectedDate).getDay()];
+
+    const tbody = document.getElementById('reliefTableBody');
+    tbody.innerHTML = '';
+
+    for (const item of absences) {
+      // Dapatkan slot jadual guru yang tidak hadir pada hari tersebut
+      const { data: slots } = await db
+        .from('timetables')
+        .select('*')
+        .eq('teacher_id', item.teachers.id)
+        .eq('day_of_week', dayCode)
+        .order('period_number');
+
+      if (slots && slots.length > 0) {
+        for (const slot of slots) {
+          // Cari guru lain yang LAPANG pada masa tersebut
+          const candidate = await findReliefCandidates(dayCode, slot.period_number, item.teachers.id);
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>Masa ${slot.period_number}</strong></td>
+            <td><strong>${slot.class_name}</strong><br><small style="color:var(--text-muted);">${slot.subject || '-'}</small></td>
+            <td>
+              <strong>${item.teachers.name}</strong><br>
+              <span class="badge badge-danger">${item.domain}</span>
+              <small style="display:block; color:var(--text-muted); margin-top:2px;">${item.remarks || ''}</small>
+            </td>
+            <td>
+              <select style="font-size:0.8rem;">
+                <option value="">-- Pilih Guru Ganti --</option>
+                ${candidate}
+              </select>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+      }
+    }
+  }
+
+  // 5. Algoritma Mencari Guru Lapang
+  async function findReliefCandidates(dayCode, period, absentTeacherId) {
+    // Dapatkan semua guru
+    const { data: allTeachers } = await db.from('teachers').select('id, name');
+    // Dapatkan guru yang ADA kelas pada masa itu
+    const { data: busySlots } = await db
+      .from('timetables')
+      .select('teacher_id')
+      .eq('day_of_week', dayCode)
+      .eq('period_number', period);
+
+    const busyTeacherIds = busySlots ? busySlots.map(s => s.teacher_id) : [];
+
+    // Tapis guru yang lapang (bukan guru tidak hadir & tiada kelas pada masa itu)
+    const freeTeachers = allTeachers.filter(t => 
+      t.id !== absentTeacherId && !busyTeacherIds.includes(t.id)
+    );
+
+    return freeTeachers.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  }
+
+  // Muat data awal bila web dibuka
+  loadTeachers();
+  loadReliefDashboard(today);
+</script>
+
+</body>
+</html>
