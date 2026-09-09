@@ -1,0 +1,82 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    background-color: #FFF0F5; /* Lavender Blush - soft pastel pink */
+    color: #4A4A4A;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 250px;
+    background-color: #FFE4E1; /* Misty Rose */
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+}
+
+.sidebar h2 {
+    color: #D87093; /* Pale Violet Red */
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin-bottom: 15px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    display: block;
+    padding: 10px;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.sidebar ul li a:hover, .sidebar ul li a.active {
+    background-color: #FFB6C1; /* Light Pink */
+    color: #FFF;
+}
+
+/* Main Content Styling */
+.main-content {
+    flex: 1;
+    padding: 40px;
+}
+
+header h1 {
+    color: #D87093;
+    margin-bottom: 5px;
+}
+
+header p {
+    color: #777;
+    margin-bottom: 30px;
+}
+
+/* Card Styling */
+.card {
+    background-color: #FFFFFF;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border-left: 5px solid #FFC0CB; /* Pink accent */
+}
+
+.card h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
