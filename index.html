@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e-Ganti | Sistem Pengurusan Guru Ganti</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Library untuk baca & proses fail Excel di browser -->
+  <!-- Library baca Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,7 +117,6 @@
     }
 
     .btn-primary { background: var(--accent); color: white; width: 100%; }
-    .btn-secondary { background: #64748b; color: white; width: 100%; margin-top: 0.5rem; }
     .btn-print { background: #334155; color: white; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem; }
@@ -133,6 +132,22 @@
       border-radius: 10px;
       background: #f8fafc;
       margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      background-color: #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .progress-bar-fill {
+      height: 10px;
+      background-color: var(--accent);
+      width: 0%;
+      transition: width 0.2s;
     }
 
     @media print {
@@ -157,7 +172,7 @@
   <div class="tab-bar no-print">
     <button class="tab-btn active" onclick="switchTab('tab-relief')">Urus Relief</button>
     <button class="tab-btn" onclick="switchTab('tab-guru')">Senarai Guru</button>
-    <button class="tab-btn" onclick="switchTab('tab-jadual')">Upload Excel Jadual</button>
+    <button class="tab-btn" onclick="switchTab('tab-jadual')">Upload Fail Jadual</button>
   </div>
 
   <!-- TAB 1: URUS RELIEF -->
@@ -170,23 +185,24 @@
       </div>
       <div class="form-group">
         <label>Nama Guru</label>
-        <select id="teacherSelect"><option value="">-- Pilih Guru --</option></select>
+        <select id="teacherSelect"><option value="">-- Muat turun senarai guru... --</option></select>
       </div>
       <div class="form-group">
         <label>Domain Ketidakhadiran</label>
         <select id="domainSelect">
-          <option value="Tugas Rasmi">Tugas Rasmi (Mesyuarat / Bengkel / Kursus)</option>
+          <option value="Tugas Rasmi">Tugas Rasmi (Mesyuarat / Bengkel / Kursus / Kokum)</option>
           <option value="Cuti Sakit (MC)">Cuti Sakit (MC)</option>
           <option value="Cuti Rehat Khas (CRK)">Cuti Rehat Khas (CRK)</option>
           <option value="Cuti Kecemasan (EL)">Cuti Kecemasan (EL)</option>
           <option value="Cuti Tanpa Rekod (CTR)">Cuti Tanpa Rekod (CTR) / Bersalin</option>
+          <option value="Hal-Hal Luar">Hal-Hal Luar / Urusan Khas</option>
         </select>
       </div>
       <div class="form-group">
         <label>Catatan Spesifik (Pilihan)</label>
-        <textarea id="absenceRemarks" rows="2" placeholder="Contoh: Mengiringi murid aktiviti sukan"></textarea>
+        <textarea id="absenceRemarks" rows="2" placeholder="Contoh: Taklimat Pengurusan di PPD"></textarea>
       </div>
-      <button class="btn btn-primary" onclick="submitAbsence()">Daftar Ketidakhadiran & Semak Relief</button>
+      <button class="btn btn-primary" onclick="submitAbsence()">Daftar Ketidakhadiran & Cari Ganti</button>
     </div>
 
     <div class="card">
@@ -199,9 +215,9 @@
           <thead>
             <tr>
               <th>Waktu</th>
-              <th>Kelas</th>
+              <th>Kelas / Subjek</th>
               <th>Guru Asal & Alasan</th>
-              <th>Cadangan Guru Ganti (Lapang)</th>
+              <th>Cadangan Guru Ganti (Paling Kurang Mengajar)</th>
             </tr>
           </thead>
           <tbody id="reliefTableBody">
@@ -215,39 +231,31 @@
   <!-- TAB 2: SENARAI GURU -->
   <div id="tab-guru" class="tab-content">
     <div class="card">
-      <h2>Daftar Guru Baharu</h2>
-      <div class="form-group">
-        <label>Nama Penuh Guru</label>
-        <input type="text" id="newTeacherName" placeholder="Contoh: AHMAD BIN ABDULLAH">
-      </div>
-      <div class="form-group">
-        <label>Kod / Singkatan Nama</label>
-        <input type="text" id="newTeacherShort" placeholder="Contoh: ABA">
-      </div>
-      <button class="btn btn-primary" onclick="submitNewTeacher()">Simpan Maklumat Guru</button>
-    </div>
-
-    <div class="card">
-      <h2>Senarai Guru Berdaftar</h2>
-      <ul id="teacherListContainer" style="list-style: none; padding: 0; font-size: 0.9rem;"></ul>
+      <h2>Senarai Guru Berdaftar (<span id="totalTeachersCount">0</span>)</h2>
+      <ul id="teacherListContainer" style="list-style: none; padding: 0; font-size: 0.9rem; max-height: 400px; overflow-y: auto;"></ul>
     </div>
   </div>
 
-  <!-- TAB 3: MUAT NAIK EXCEL JADUAL -->
+  <!-- TAB 3: MUAT NAIK JADUAL WAKTU -->
   <div id="tab-jadual" class="tab-content">
     <div class="card">
-      <h2>Muat Naik Jadual Waktu (Excel / CSV)</h2>
+      <h2>Muat Naik Jadual Waktu Asal Sekolah (Excel)</h2>
       
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-        Sila muat naik fail Excel (.xlsx / .xls) atau fail CSV jadual waktu sekolah. Sistem akan memproses dan menyimpannya ke pangkalan data secara automatik.
+        Sistem diselaraskan khas untuk membaca fail eksport perisian jadual waktu rasmi (seperti format <strong>(KUATKUASA 7 SEPTEMBER 2026) JADUAL WAKTU GURU 2026</strong>).
       </p>
 
       <div class="upload-box">
-        <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: block; margin: 0 auto;">
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display: block; margin: 0 auto;">
       </div>
 
-      <button class="btn btn-primary" id="btnUploadProcess" onclick="processExcelUpload()">Proses & Simpan Jadual</button>
-      <button class="btn btn-secondary" onclick="downloadTemplate()">Muat Turun Templat Excel Contoh</button>
+      <div class="progress-bar" id="uploadProgressBar">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+
+      <button class="btn btn-primary" id="btnUploadProcess" onclick="processCustomSchoolExcel()" style="margin-top: 10px;">
+        Proses & Masukkan ke Pangkalan Data
+      </button>
 
       <div id="uploadStatus" style="margin-top: 1rem; font-size: 0.85rem; font-weight: 600;"></div>
     </div>
@@ -274,6 +282,7 @@
     const { data } = await db.from('teachers').select('*').order('name');
     if (!data) return;
 
+    document.getElementById('totalTeachersCount').innerText = data.length;
     const select1 = document.getElementById('teacherSelect');
     const listContainer = document.getElementById('teacherListContainer');
     select1.innerHTML = '<option value="">-- Pilih Guru --</option>';
@@ -283,51 +292,27 @@
       select1.innerHTML += `<option value="${t.id}">${t.name}</option>`;
       listContainer.innerHTML += `<li style="padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
         <span>${t.name}</span>
-        <span style="color: var(--text-muted);">${t.short_name || '-'}</span>
+        <span style="color: var(--text-muted); font-size:0.75rem;">Quota: ${t.max_relief_per_day || 2}</span>
       </li>`;
     });
   }
 
-  async function submitNewTeacher() {
-    const name = document.getElementById('newTeacherName').value.trim();
-    const short_name = document.getElementById('newTeacherShort').value.trim();
-    if (!name) return alert("Sila masukkan nama guru.");
-
-    const { error } = await db.from('teachers').insert([{ name, short_name, max_relief_per_day: 2 }]);
-    if (error) alert(error.message);
-    else {
-      alert("Guru berjaya didaftarkan!");
-      document.getElementById('newTeacherName').value = '';
-      document.getElementById('newTeacherShort').value = '';
-      loadTeachers();
-    }
-  }
-
-  // Muat turun templat Excel contoh supaya cikgu tahu susunan header
-  function downloadTemplate() {
-    const sampleData = [
-      { "Nama Guru": "SURYANA LINGGAM", "Hari": "Mo", "Masa": 2, "Kelas": "5K UKM", "Subjek": "MM" },
-      { "Nama Guru": "SURYANA LINGGAM", "Hari": "Mo", "Masa": 7, "Kelas": "4K UITM", "Subjek": "BI" },
-      { "Nama Guru": "JASNI MANSU", "Hari": "Mo", "Masa": 5, "Kelas": "3 KREATIF", "Subjek": "PJK" }
-    ];
-    const ws = XLSX.utils.json_to_sheet(sampleData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Jadual");
-    XLSX.writeFile(wb, "templat_jadual_eganti.xlsx");
-  }
-
-  // Proses Fail Excel yang Diupload
-  async function processExcelUpload() {
+  // --- PEMBACA KHAS FORMAT ASC TIMETABLE SEKOLAH ---
+  async function processCustomSchoolExcel() {
     const fileInput = document.getElementById('excelFileInput');
     const status = document.getElementById('uploadStatus');
+    const progressBar = document.getElementById('uploadProgressBar');
+    const progressFill = document.getElementById('progressBarFill');
 
     if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Sila pilih fail Excel atau CSV terlebih dahulu!");
+      alert("Sila pilih fail Excel jadual waktu terlebih dahulu!");
       return;
     }
 
-    status.innerText = "Membaca fail Excel...";
+    status.innerText = "Membaca struktur jadual...";
     status.style.color = "var(--accent)";
+    progressBar.style.display = "block";
+    progressFill.style.width = "20%";
 
     const file = fileInput.files[0];
     const reader = new FileReader();
@@ -336,69 +321,149 @@
       try {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        if (jsonData.length === 0) {
-          status.innerText = "Fail kosong atau format tidak sah.";
-          status.style.color = "var(--danger)";
-          return;
-        }
+        // Tukar sheet ke format matriks 2D
+        const grid = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+        const maxR = grid.length;
 
-        status.innerText = `Menjumpai ${jsonData.length} slot jadual. Memproses ke pangkalan data...`;
+        status.innerText = "Mengekstrak maklumat guru & slot mengajar...";
+        progressFill.style.width = "50%";
 
-        // 1. Ambil semua senarai guru sedia ada
-        const { data: existingTeachers } = await db.from('teachers').select('id, name');
-        const teacherMap = new Map();
-        existingTeachers.forEach(t => teacherMap.set(t.name.trim().toUpperCase(), t.id));
+        const days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+        const extractedSlots = [];
+        const foundTeacherNames = new Set();
 
-        const timetablePayload = [];
+        let r = 0;
+        let currentTeacher = null;
+        let periodCols = {};
 
-        for (const row of jsonData) {
-          // Cari kunci yang fleksibel (huruf kecil / besar)
-          const teacherName = (row['Nama Guru'] || row['nama'] || row['guru'] || row['TEACHER'] || '').toString().trim().toUpperCase();
-          const day = (row['Hari'] || row['hari'] || row['DAY'] || '').toString().trim();
-          const period = parseInt(row['Masa'] || row['masa'] || row['PERIOD'] || 0);
-          const className = (row['Kelas'] || row['kelas'] || row['CLASS'] || '').toString().trim();
-          const subject = (row['Subjek'] || row['subjek'] || row['SUBJECT'] || '').toString().trim();
+        while (r < maxR) {
+          const row = grid[r] || [];
+          const rowStr = row.slice(0, 15).join(' ');
 
-          if (!teacherName || !day || !period || !className) continue;
-
-          // Jika guru belum wujud, daftarkan secara automatik
-          let teacherId = teacherMap.get(teacherName);
-          if (!teacherId) {
-            const { data: newTeacher } = await db.from('teachers').insert([{ name: teacherName, max_relief_per_day: 2 }]).select().single();
-            if (newTeacher) {
-              teacherId = newTeacher.id;
-              teacherMap.set(teacherName, teacherId);
+          // 1. Kenal pasti tajuk guru (Contoh: Teacher SURYANA LINGGAM)
+          if (rowStr.includes('Teacher ')) {
+            for (let c = 0; c < 15; c++) {
+              const val = String(row[c] || '');
+              if (val.includes('Teacher ')) {
+                currentTeacher = val.replace(/Teacher\s+/i, '').trim().toUpperCase();
+                foundTeacherNames.add(currentTeacher);
+                break;
+              }
             }
+
+            // Cari nombor waktu (period) di baris seterusnya
+            r++;
+            periodCols = {};
+            for (let pr = r; pr < Math.min(r + 2, maxR); pr++) {
+              const pRow = grid[pr] || [];
+              for (let c = 1; c < pRow.length; c++) {
+                const val = String(pRow[c] || '').trim();
+                if (val && val !== 'REST' && !val.includes(':') && !isNaN(val)) {
+                  periodCols[c] = parseInt(val);
+                }
+              }
+              if (Object.keys(periodCols).length > 2) {
+                r = pr + 1;
+                break;
+              }
+            }
+            continue;
           }
 
-          timetablePayload.push({
-            teacher_id: teacherId,
-            day_of_week: day,
-            period_number: period,
-            class_name: className,
-            subject: subject
-          });
+          // 2. Kenal pasti baris Hari (Mo, Tu, We, Th, Fr)
+          const firstCell = String(row[0] || '').trim();
+          if (days.includes(firstCell) && currentTeacher) {
+            const currentDay = firstCell;
+            const subRows = [r];
+            let nr = r + 1;
+
+            // Kumpul sub-baris bagi hari tersebut
+            while (nr < maxR) {
+              const nextRow = grid[nr] || [];
+              const nextC0 = String(nextRow[0] || '').trim();
+              const nextRowStr = nextRow.slice(0, 15).join(' ');
+
+              if (days.includes(nextC0) || nextRowStr.includes('Teacher ')) {
+                break;
+              }
+              subRows.push(nr);
+              nr++;
+            }
+
+            // Kumpul teks kelas bagi setiap period
+            for (const [colIndex, periodNum] of Object.entries(periodCols)) {
+              const cellTexts = [];
+              for (const sr of subRows) {
+                const cv = (grid[sr] && grid[sr][colIndex]) ? String(grid[sr][colIndex]).trim() : '';
+                if (cv) cellTexts.push(cv);
+              }
+
+              if (cellTexts.length > 0) {
+                const combined = cellTexts.join(' ').replace(/\r?\n|\r/g, ' ').replace(/\s+/g, ' ').trim();
+                // Asingkan nama kelas & subjek secara anggaran mudah
+                const parts = combined.split(' ');
+                const subject = parts[0] || 'SUBJEK';
+                const className = parts.slice(1).join(' ') || combined;
+
+                extractedSlots.push({
+                  teacher: currentTeacher,
+                  day: currentDay,
+                  period: periodNum,
+                  class_name: className,
+                  subject: subject
+                });
+              }
+            }
+            r = nr;
+            continue;
+          }
+
+          r++;
         }
 
-        if (timetablePayload.length > 0) {
-          const { error } = await db.from('timetables').insert(timetablePayload);
+        status.innerText = `Menjumpai ${foundTeacherNames.size} orang guru dan ${extractedSlots.length} slot waktu. Menyimpan ke Supabase...`;
+        progressFill.style.width = "75%";
+
+        // 3. Masukkan guru-guru yang belum wujud ke pangkalan data
+        const { data: existingTeachers } = await db.from('teachers').select('id, name');
+        const teacherMap = new Map();
+        (existingTeachers || []).forEach(t => teacherMap.set(t.name.trim().toUpperCase(), t.id));
+
+        for (const tName of foundTeacherNames) {
+          if (!teacherMap.has(tName)) {
+            const { data: insertedTeacher } = await db.from('teachers').insert([{ name: tName, max_relief_per_day: 2 }]).select().single();
+            if (insertedTeacher) teacherMap.set(tName, insertedTeacher.id);
+          }
+        }
+
+        // 4. Masukkan rekod jadual waktu induk secara berkelompok (batching)
+        const payload = extractedSlots.map(slot => ({
+          teacher_id: teacherMap.get(slot.teacher),
+          day_of_week: slot.day,
+          period_number: slot.period,
+          class_name: slot.class_name,
+          subject: slot.subject
+        })).filter(p => p.teacher_id);
+
+        // Hantar 200 rekod setiap kali untuk elak sekatan saiz muatan
+        const chunkSize = 200;
+        for (let i = 0; i < payload.length; i += chunkSize) {
+          const chunk = payload.slice(i, i + chunkSize);
+          const { error } = await db.from('timetables').insert(chunk);
           if (error) throw error;
-
-          status.innerText = `Berjaya memuat naik ${timetablePayload.length} slot jadual waktu!`;
-          status.style.color = "var(--success)";
-          fileInput.value = '';
-          loadTeachers();
-        } else {
-          status.innerText = "Tiada data sah yang dapat diekstrak. Sila gunakan templat contoh.";
-          status.style.color = "var(--danger)";
         }
+
+        progressFill.style.width = "100%";
+        status.innerText = `Selesai! ${foundTeacherNames.size} guru dan ${payload.length} slot jadual berjaya dimuat naik sepenuhnya!`;
+        status.style.color = "var(--success)";
+        fileInput.value = '';
+        loadTeachers();
 
       } catch (err) {
         console.error(err);
-        status.innerText = "Ralat memproses fail: " + err.message;
+        status.innerText = "Ralat memproses: " + err.message;
         status.style.color = "var(--danger)";
       }
     };
@@ -406,6 +471,7 @@
     reader.readAsArrayBuffer(file);
   }
 
+  // --- REKOD KETIDAKHADIRAN & CARI RELIEF ---
   async function submitAbsence() {
     const teacherId = document.getElementById('teacherSelect').value;
     const date = document.getElementById('absentDate').value;
@@ -438,7 +504,7 @@
 
     for (const item of absences) {
       const { data: slots } = await db.from('timetables').select('*').eq('teacher_id', item.teachers.id).eq('day_of_week', dayCode).order('period_number');
-      if (slots) {
+      if (slots && slots.length > 0) {
         for (const slot of slots) {
           const candidate = await findReliefCandidates(dayCode, slot.period_number, item.teachers.id);
           const tr = document.createElement('tr');
@@ -448,7 +514,7 @@
             <td>
               <strong>${item.teachers.name}</strong><br>
               <span class="badge badge-danger">${item.domain}</span>
-              <small style="display:block; color:var(--text-muted);">${item.remarks || ''}</small>
+              <small style="display:block; color:var(--text-muted); margin-top:2px;">${item.remarks || ''}</small>
             </td>
             <td>
               <select style="font-size:0.8rem;">
@@ -462,13 +528,35 @@
     }
   }
 
+  // Cari guru lapang dan susun daripada guru yang paling sikit waktu mengajar hari itu
   async function findReliefCandidates(dayCode, period, absentTeacherId) {
     const { data: allTeachers } = await db.from('teachers').select('id, name');
-    const { data: busySlots } = await db.from('timetables').select('teacher_id').eq('day_of_week', dayCode).eq('period_number', period);
-    const busyIds = busySlots ? busySlots.map(s => s.teacher_id) : [];
+    // Ambil jadual semua guru pada hari itu
+    const { data: daySlots } = await db.from('timetables').select('teacher_id, period_number').eq('day_of_week', dayCode);
 
-    const freeTeachers = allTeachers.filter(t => t.id !== absentTeacherId && !busyIds.includes(t.id));
-    return freeTeachers.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    // Kira jumlah waktu mengajar setiap guru hari ini
+    const workloadMap = {};
+    const busyNowTeachers = new Set();
+
+    (daySlots || []).forEach(slot => {
+      workloadMap[slot.teacher_id] = (workloadMap[slot.teacher_id] || 0) + 1;
+      if (slot.period_number === period) {
+        busyNowTeachers.add(slot.teacher_id);
+      }
+    });
+
+    // Tapis cikgu yang lapang & bukan cikgu yang tidak hadir
+    const candidates = (allTeachers || [])
+      .filter(t => t.id !== absentTeacherId && !busyNowTeachers.has(t.id))
+      .map(t => ({
+        id: t.id,
+        name: t.name,
+        loadToday: workloadMap[t.id] || 0
+      }))
+      // Susun ikut beban waktu (yang paling kurang mengajar di atas sekali)
+      .sort((a, b) => a.loadToday - b.loadToday);
+
+    return candidates.map(t => `<option value="${t.id}">${t.name} (${t.loadToday} masa hari ini)</option>`).join('');
   }
 
   loadTeachers();
