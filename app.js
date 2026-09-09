@@ -74,3 +74,32 @@ async function tambahGuruTest() {
 window.onload = () => {
     dapatkanSenaraiGuru();
 };
+
+// ==========================================
+// KAWALAN DRAWER / HAMBURGER MENU (MOBILE)
+// ==========================================
+const menuToggle = document.getElementById('menu-toggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+function toggleDrawer() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+}
+
+// Buka laci bila butang ☰ ditekan
+menuToggle.addEventListener('click', toggleDrawer);
+
+// Tutup laci bila bahagian gelap (overlay) ditekan
+overlay.addEventListener('click', toggleDrawer);
+
+// (Pilihan) Tutup laci bila menu di klik
+const menuLinks = document.querySelectorAll('.sidebar ul li a');
+menuLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        // Hanya tutup automatik jika dalam mode telefon
+        if (window.innerWidth <= 768) {
+            toggleDrawer();
+        }
+    });
+});
