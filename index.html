@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Guru Ganti Saz</title>
     
-    <!-- Supabase & PapaParse (Untuk baca CSV) -->
+    <!-- Supabase & SheetJS (Untuk baca Excel) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap');
@@ -96,7 +96,6 @@
             </div>
             <div class="form-group">
                 <label for="maxPeriods">Had Maksimum Waktu Mengajar (Sehari)</label>
-                <!-- Default ditetapkan 8 mengikut keperluan elak guru penat -->
                 <input type="number" id="maxPeriods" value="8" required> 
             </div>
             <button type="submit">🎀 Tambah Guru</button>
@@ -110,18 +109,19 @@
         </div>
     </div>
 
-    <!-- KOTAK 2: Muat Naik Jadual CSV -->
+    <!-- KOTAK 2: Muat Naik Jadual EXCEL -->
     <div class="container">
-        <h2>📅 Muat Naik Jadual (CSV)</h2>
+        <h2>📅 Muat Naik Jadual (Excel)</h2>
         <p style="font-size: 14px; color: #888; text-align: center;">
-            Format lajur MESTI mengikut ejaan ini: <br>
+            Format lajur (baris pertama) MESTI mengikut ejaan ini: <br>
             <b>Nama Guru, Hari, Waktu, Kelas, Subjek</b>
         </p>
         
         <div class="form-group">
-            <input type="file" id="csvFile" accept=".csv" style="background: #fff9fa; padding: 15px;">
+            <!-- Tukar accept kepada fail excel -->
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="background: #fff9fa; padding: 15px;">
         </div>
-        <button id="uploadCsvBtn">🚀 Proses & Simpan Jadual</button>
+        <button id="uploadExcelBtn">🚀 Proses & Simpan Jadual Excel</button>
     </div>
 
     <script src="app.js"></script>
