@@ -80,3 +80,75 @@ header p {
     margin-bottom: 10px;
 }
 
+/* Borang (Form) Styling */
+form {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+input {
+    padding: 12px;
+    border: 1px solid #FFB6C1;
+    border-radius: 8px;
+    outline: none;
+    flex: 1;
+    min-width: 200px;
+    background-color: #FFF;
+    color: #555;
+}
+
+input:focus {
+    border-color: #D87093;
+    box-shadow: 0 0 5px rgba(216, 112, 147, 0.3);
+}
+
+button {
+    padding: 12px 25px;
+    background-color: #D87093;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 600;
+}
+
+button:hover {
+    background-color: #C71585; /* Pink yang lebih gelap sikit bila diover */
+}
+
+/* Jadual Styling */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #FFE4E1;
+}
+
+th {
+    background-color: #FFB6C1;
+    color: white;
+}
+
+/* Butang Padam */
+.btn-delete {
+    background-color: #ff7675;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+}
+
+.btn-delete:hover {
+    background-color: #d63031;
+}
