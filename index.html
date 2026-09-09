@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e-Ganti | Sistem Pengurusan Guru Ganti</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Library untuk baca & proses fail Excel di browser -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,7 +42,6 @@
     header h1 { font-size: 1.25rem; font-weight: 700; }
     header p { font-size: 0.8rem; color: #94a3b8; }
 
-    /* Navigasi Tab */
     .tab-bar {
       display: flex;
       gap: 0.5rem;
@@ -71,7 +72,6 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Cards & Form */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -117,6 +117,7 @@
     }
 
     .btn-primary { background: var(--accent); color: white; width: 100%; }
+    .btn-secondary { background: #64748b; color: white; width: 100%; margin-top: 0.5rem; }
     .btn-print { background: #334155; color: white; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem; }
@@ -124,6 +125,15 @@
     th { background: #f1f5f9; font-weight: 600; }
     .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
     .badge-danger { background: #fee2e2; color: var(--danger); }
+
+    .upload-box {
+      border: 2px dashed #cbd5e1;
+      padding: 1.5rem;
+      text-align: center;
+      border-radius: 10px;
+      background: #f8fafc;
+      margin-bottom: 1rem;
+    }
 
     @media print {
       body { background: white; padding: 0; }
@@ -143,11 +153,11 @@
     <button class="btn btn-print no-print" onclick="window.print()">Cetak Slip</button>
   </header>
 
-  <!-- Bar Tab Pilihan -->
+  <!-- Navigasi Tab -->
   <div class="tab-bar no-print">
     <button class="tab-btn active" onclick="switchTab('tab-relief')">Urus Relief</button>
-    <button class="tab-btn" onclick="switchTab('tab-guru')">Tambah Guru</button>
-    <button class="tab-btn" onclick="switchTab('tab-jadual')">Input Jadual</button>
+    <button class="tab-btn" onclick="switchTab('tab-guru')">Senarai Guru</button>
+    <button class="tab-btn" onclick="switchTab('tab-jadual')">Upload Excel Jadual</button>
   </div>
 
   <!-- TAB 1: URUS RELIEF -->
@@ -160,7 +170,7 @@
       </div>
       <div class="form-group">
         <label>Nama Guru</label>
-        <select id="teacherSelect"><option value="">-- Muat turun senarai... --</option></select>
+        <select id="teacherSelect"><option value="">-- Pilih Guru --</option></select>
       </div>
       <div class="form-group">
         <label>Domain Ketidakhadiran</label>
@@ -202,7 +212,7 @@
     </div>
   </div>
 
-  <!-- TAB 2: TAMBAH GURU -->
+  <!-- TAB 2: SENARAI GURU -->
   <div id="tab-guru" class="tab-content">
     <div class="card">
       <h2>Daftar Guru Baharu</h2>
@@ -214,45 +224,32 @@
         <label>Kod / Singkatan Nama</label>
         <input type="text" id="newTeacherShort" placeholder="Contoh: ABA">
       </div>
-      <div class="form-group">
-        <label>Maksimum Relief Sehari</label>
-        <input type="number" id="newTeacherQuota" value="2">
-      </div>
       <button class="btn btn-primary" onclick="submitNewTeacher()">Simpan Maklumat Guru</button>
+    </div>
+
+    <div class="card">
+      <h2>Senarai Guru Berdaftar</h2>
+      <ul id="teacherListContainer" style="list-style: none; padding: 0; font-size: 0.9rem;"></ul>
     </div>
   </div>
 
-  <!-- TAB 3: INPUT JADUAL -->
+  <!-- TAB 3: MUAT NAIK EXCEL JADUAL -->
   <div id="tab-jadual" class="tab-content">
     <div class="card">
-      <h2>Tambah Slot Jadual Waktu Guru</h2>
-      <div class="form-group">
-        <label>Pilih Guru</label>
-        <select id="scheduleTeacherSelect"><option value="">-- Pilih Guru --</option></select>
+      <h2>Muat Naik Jadual Waktu (Excel / CSV)</h2>
+      
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Sila muat naik fail Excel (.xlsx / .xls) atau fail CSV jadual waktu sekolah. Sistem akan memproses dan menyimpannya ke pangkalan data secara automatik.
+      </p>
+
+      <div class="upload-box">
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: block; margin: 0 auto;">
       </div>
-      <div class="form-group">
-        <label>Hari</label>
-        <select id="scheduleDay">
-          <option value="Mo">Isnin (Mo)</option>
-          <option value="Tu">Selasa (Tu)</option>
-          <option value="We">Rabu (We)</option>
-          <option value="Th">Khamis (Th)</option>
-          <option value="Fr">Jumaat (Fr)</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Masa ke- (Period)</label>
-        <input type="number" id="schedulePeriod" min="1" max="12" placeholder="Contoh: 3">
-      </div>
-      <div class="form-group">
-        <label>Kelas</label>
-        <input type="text" id="scheduleClass" placeholder="Contoh: 5 KREATIF">
-      </div>
-      <div class="form-group">
-        <label>Mata Pelajaran</label>
-        <input type="text" id="scheduleSubject" placeholder="Contoh: BM">
-      </div>
-      <button class="btn btn-primary" onclick="submitSchedule()">Tambah Slot Jadual</button>
+
+      <button class="btn btn-primary" id="btnUploadProcess" onclick="processExcelUpload()">Proses & Simpan Jadual</button>
+      <button class="btn btn-secondary" onclick="downloadTemplate()">Muat Turun Templat Excel Contoh</button>
+
+      <div id="uploadStatus" style="margin-top: 1rem; font-size: 0.85rem; font-weight: 600;"></div>
     </div>
   </div>
 </div>
@@ -278,24 +275,25 @@
     if (!data) return;
 
     const select1 = document.getElementById('teacherSelect');
-    const select2 = document.getElementById('scheduleTeacherSelect');
+    const listContainer = document.getElementById('teacherListContainer');
     select1.innerHTML = '<option value="">-- Pilih Guru --</option>';
-    select2.innerHTML = '<option value="">-- Pilih Guru --</option>';
+    listContainer.innerHTML = '';
 
     data.forEach(t => {
       select1.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-      select2.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+      listContainer.innerHTML += `<li style="padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <span>${t.name}</span>
+        <span style="color: var(--text-muted);">${t.short_name || '-'}</span>
+      </li>`;
     });
   }
 
   async function submitNewTeacher() {
     const name = document.getElementById('newTeacherName').value.trim();
     const short_name = document.getElementById('newTeacherShort').value.trim();
-    const max_relief_per_day = parseInt(document.getElementById('newTeacherQuota').value);
-
     if (!name) return alert("Sila masukkan nama guru.");
 
-    const { error } = await db.from('teachers').insert([{ name, short_name, max_relief_per_day }]);
+    const { error } = await db.from('teachers').insert([{ name, short_name, max_relief_per_day: 2 }]);
     if (error) alert(error.message);
     else {
       alert("Guru berjaya didaftarkan!");
@@ -305,23 +303,107 @@
     }
   }
 
-  async function submitSchedule() {
-    const teacher_id = document.getElementById('scheduleTeacherSelect').value;
-    const day_of_week = document.getElementById('scheduleDay').value;
-    const period_number = parseInt(document.getElementById('schedulePeriod').value);
-    const class_name = document.getElementById('scheduleClass').value.trim();
-    const subject = document.getElementById('scheduleSubject').value.trim();
+  // Muat turun templat Excel contoh supaya cikgu tahu susunan header
+  function downloadTemplate() {
+    const sampleData = [
+      { "Nama Guru": "SURYANA LINGGAM", "Hari": "Mo", "Masa": 2, "Kelas": "5K UKM", "Subjek": "MM" },
+      { "Nama Guru": "SURYANA LINGGAM", "Hari": "Mo", "Masa": 7, "Kelas": "4K UITM", "Subjek": "BI" },
+      { "Nama Guru": "JASNI MANSU", "Hari": "Mo", "Masa": 5, "Kelas": "3 KREATIF", "Subjek": "PJK" }
+    ];
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Jadual");
+    XLSX.writeFile(wb, "templat_jadual_eganti.xlsx");
+  }
 
-    if (!teacher_id || isNaN(period_number) || !class_name) return alert("Sila lengkapkan semua ruangan jadual.");
+  // Proses Fail Excel yang Diupload
+  async function processExcelUpload() {
+    const fileInput = document.getElementById('excelFileInput');
+    const status = document.getElementById('uploadStatus');
 
-    const { error } = await db.from('timetables').insert([{ teacher_id, day_of_week, period_number, class_name, subject }]);
-    if (error) alert(error.message);
-    else {
-      alert("Slot jadual berjaya disimpan!");
-      document.getElementById('schedulePeriod').value = '';
-      document.getElementById('scheduleClass').value = '';
-      document.getElementById('scheduleSubject').value = '';
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert("Sila pilih fail Excel atau CSV terlebih dahulu!");
+      return;
     }
+
+    status.innerText = "Membaca fail Excel...";
+    status.style.color = "var(--accent)";
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+        if (jsonData.length === 0) {
+          status.innerText = "Fail kosong atau format tidak sah.";
+          status.style.color = "var(--danger)";
+          return;
+        }
+
+        status.innerText = `Menjumpai ${jsonData.length} slot jadual. Memproses ke pangkalan data...`;
+
+        // 1. Ambil semua senarai guru sedia ada
+        const { data: existingTeachers } = await db.from('teachers').select('id, name');
+        const teacherMap = new Map();
+        existingTeachers.forEach(t => teacherMap.set(t.name.trim().toUpperCase(), t.id));
+
+        const timetablePayload = [];
+
+        for (const row of jsonData) {
+          // Cari kunci yang fleksibel (huruf kecil / besar)
+          const teacherName = (row['Nama Guru'] || row['nama'] || row['guru'] || row['TEACHER'] || '').toString().trim().toUpperCase();
+          const day = (row['Hari'] || row['hari'] || row['DAY'] || '').toString().trim();
+          const period = parseInt(row['Masa'] || row['masa'] || row['PERIOD'] || 0);
+          const className = (row['Kelas'] || row['kelas'] || row['CLASS'] || '').toString().trim();
+          const subject = (row['Subjek'] || row['subjek'] || row['SUBJECT'] || '').toString().trim();
+
+          if (!teacherName || !day || !period || !className) continue;
+
+          // Jika guru belum wujud, daftarkan secara automatik
+          let teacherId = teacherMap.get(teacherName);
+          if (!teacherId) {
+            const { data: newTeacher } = await db.from('teachers').insert([{ name: teacherName, max_relief_per_day: 2 }]).select().single();
+            if (newTeacher) {
+              teacherId = newTeacher.id;
+              teacherMap.set(teacherName, teacherId);
+            }
+          }
+
+          timetablePayload.push({
+            teacher_id: teacherId,
+            day_of_week: day,
+            period_number: period,
+            class_name: className,
+            subject: subject
+          });
+        }
+
+        if (timetablePayload.length > 0) {
+          const { error } = await db.from('timetables').insert(timetablePayload);
+          if (error) throw error;
+
+          status.innerText = `Berjaya memuat naik ${timetablePayload.length} slot jadual waktu!`;
+          status.style.color = "var(--success)";
+          fileInput.value = '';
+          loadTeachers();
+        } else {
+          status.innerText = "Tiada data sah yang dapat diekstrak. Sila gunakan templat contoh.";
+          status.style.color = "var(--danger)";
+        }
+
+      } catch (err) {
+        console.error(err);
+        status.innerText = "Ralat memproses fail: " + err.message;
+        status.style.color = "var(--danger)";
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
   }
 
   async function submitAbsence() {
