@@ -9,7 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="sidebar">
+    <!-- Latar Belakang Gelap untuk Mobile (Overlay) -->
+    <div id="overlay" class="overlay"></div>
+
+    <div class="sidebar" id="sidebar">
         <h2>Admin Sekolah</h2>
         <ul>
             <li><a href="#" id="menu-jadual">Jadual Induk</a></li>
@@ -21,14 +24,16 @@
 
     <div class="main-content">
         <header>
-            <h1>Sistem Pengurusan Guru Ganti (Relief)</h1>
+            <!-- Butang Hamburger -->
+            <button id="menu-toggle" class="menu-btn">☰</button>
+            <h1>Sistem Pengurusan Guru Ganti</h1>
         </header>
 
         <!-- Bahagian untuk memaparkan senarai guru dari pangkalan data -->
         <section id="content-area">
             <div class="card">
                 <h3>Senarai Guru</h3>
-                <button onclick="tambahGuruTest()">+ Tambah Guru Ujian</button>
+                <button class="btn-tambah" onclick="tambahGuruTest()">+ Tambah Guru Ujian</button>
                 <div id="senarai-guru-container">
                     <p>Memuatkan data...</p>
                 </div>
