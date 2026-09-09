@@ -2,29 +2,29 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Arial, sans-serif;
 }
 
 body {
     display: flex;
-    min-height: 100vh;
-    background-color: #FFF0F5; /* Lavender Blush - soft pastel pink */
-    color: #4A4A4A;
+    background-color: #f4f6f9; /* Kelabu Sangat Cair */
+    color: #333;
 }
 
-/* Sidebar Styling */
 .sidebar {
     width: 250px;
-    background-color: #FFE4E1; /* Misty Rose */
+    background-color: #1a2b4c; /* Biru Gelap Korporat */
+    color: white;
+    height: 100vh;
     padding: 20px;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    position: fixed;
 }
 
 .sidebar h2 {
-    color: #D87093; /* Pale Violet Red */
+    font-size: 1.2rem;
     margin-bottom: 30px;
-    font-size: 1.5rem;
-    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #3a4b6c;
 }
 
 .sidebar ul {
@@ -36,119 +36,65 @@ body {
 }
 
 .sidebar ul li a {
+    color: #cbd5e1;
     text-decoration: none;
-    color: #555;
-    font-weight: 500;
+    font-size: 1rem;
     display: block;
-    padding: 10px;
-    border-radius: 10px;
-    transition: 0.3s;
+    transition: color 0.3s;
 }
 
-.sidebar ul li a:hover, .sidebar ul li a.active {
-    background-color: #FFB6C1; /* Light Pink */
-    color: #FFF;
+.sidebar ul li a:hover {
+    color: #ffffff;
 }
 
-/* Main Content Styling */
 .main-content {
-    flex: 1;
-    padding: 40px;
+    margin-left: 250px;
+    padding: 30px;
+    width: calc(100% - 250px);
 }
 
 header h1 {
-    color: #D87093;
-    margin-bottom: 5px;
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin-bottom: 20px;
 }
 
-header p {
-    color: #777;
-    margin-bottom: 30px;
-}
-
-/* Card Styling */
 .card {
-    background-color: #FFFFFF;
+    background-color: white;
     padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    border-left: 5px solid #FFC0CB; /* Pink accent */
-}
-
-.card h3 {
-    color: #333;
-    margin-bottom: 10px;
-}
-
-/* Borang (Form) Styling */
-form {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    margin-top: 15px;
-}
-
-input {
-    padding: 12px;
-    border: 1px solid #FFB6C1;
     border-radius: 8px;
-    outline: none;
-    flex: 1;
-    min-width: 200px;
-    background-color: #FFF;
-    color: #555;
-}
-
-input:focus {
-    border-color: #D87093;
-    box-shadow: 0 0 5px rgba(216, 112, 147, 0.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
 }
 
 button {
-    padding: 12px 25px;
-    background-color: #D87093;
+    background-color: #2563eb;
     color: white;
     border: none;
-    border-radius: 8px;
+    padding: 10px 15px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: 0.3s;
-    font-weight: 600;
+    font-weight: bold;
+    margin-bottom: 15px;
 }
 
 button:hover {
-    background-color: #C71585; /* Pink yang lebih gelap sikit bila diover */
-}
-
-/* Jadual Styling */
-.table-responsive {
-    overflow-x: auto;
+    background-color: #1d4ed8;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 th, td {
-    padding: 15px;
+    border: 1px solid #cbd5e1;
+    padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #FFE4E1;
 }
 
 th {
-    background-color: #FFB6C1;
-    color: white;
-}
-
-/* Butang Padam */
-.btn-delete {
-    background-color: #ff7675;
-    padding: 8px 12px;
-    font-size: 0.8rem;
-}
-
-.btn-delete:hover {
-    background-color: #d63031;
+    background-color: #f8fafc;
+    font-weight: 600;
 }
