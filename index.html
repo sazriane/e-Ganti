@@ -29,17 +29,66 @@
             <h1>Sistem Pengurusan Guru Ganti</h1>
         </header>
 
-        <!-- Bahagian untuk memaparkan senarai guru dari pangkalan data -->
+        <!-- KAWASAN KANDUNGAN DINAMIK -->
         <section id="content-area">
-            <div class="card">
-                <h3>Senarai Guru</h3>
-                <button class="btn-tambah" onclick="tambahGuruTest()">+ Tambah Guru Ujian</button>
-                <div id="senarai-guru-container">
-                    <p>Memuatkan data...</p>
+            
+            <!-- HALAMAN 1: SENARAI GURU -->
+            <div id="halaman-guru" class="halaman">
+                <div class="card">
+                    <h3>Senarai Guru</h3>
+                    <button class="btn-tambah" onclick="tambahGuruTest()">+ Tambah Guru Ujian</button>
+                    <div id="senarai-guru-container">
+                        <p>Memuatkan data...</p>
+                    </div>
                 </div>
             </div>
+
+            <!-- HALAMAN 2: JADUAL INDUK & KEMASUKAN JADUAL -->
+            <div id="halaman-jadual" class="halaman" style="display: none;">
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3>Tambah Jadual Mengajar</h3>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <select id="pilih-guru-jadual" style="padding: 8px; margin-right: 10px;">
+                            <option value="">-- Pilih Guru --</option>
+                        </select>
+                        <select id="pilih-hari" style="padding: 8px; margin-right: 10px;">
+                            <option value="Isnin">Isnin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Khamis">Khamis</option>
+                            <option value="Jumaat">Jumaat</option>
+                        </select>
+                        <input type="number" id="waktu-ke" placeholder="Waktu ke- (Contoh: 1)" style="padding: 8px; margin-right: 10px; width: 150px;" min="1" max="15">
+                        <input type="text" id="nama-kelas" placeholder="Kelas (Cth: 1 Mawar)" style="padding: 8px; margin-right: 10px;">
+                        <input type="text" id="subjek-kelas" placeholder="Subjek (Cth: BM)" style="padding: 8px; margin-right: 10px;">
+                        <button class="btn-tambah" onclick="simpanJadual()">Simpan Jadual</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Jadual Induk Keseluruhan</h3>
+                    <p style="margin-top:10px; color:#64748b;">(Fungsi paparan jadual bertindih akan dibina di sini)</p>
+                </div>
+            </div>
+
+            <!-- HALAMAN 3: URUS KETIDAKHADIRAN -->
+            <div id="halaman-cuti" class="halaman" style="display: none;">
+                <div class="card">
+                    <h3>Rekod Ketidakhadiran Guru</h3>
+                    <p style="margin-top:10px; color:#64748b;">(Borang dan senarai ketidakhadiran akan dibina di sini)</p>
+                </div>
+            </div>
+
+            <!-- HALAMAN 4: CADANGAN GURU GANTI -->
+            <div id="halaman-cadangan" class="halaman" style="display: none;">
+                <div class="card">
+                    <h3>Cadangan Guru Ganti (Relief)</h3>
+                    <p style="margin-top:10px; color:#64748b;">(Algoritma pintar guru ganti akan dipaparkan di sini)</p>
+                </div>
+            </div>
+
         </section>
-    </div>
+
 
     <script src="app.js"></script>
 </body>
