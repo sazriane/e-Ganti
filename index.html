@@ -3,54 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Guru Ganti 🎀</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Supabase CDN -->
+    <title>Sistem Guru Ganti</title>
+    <!-- Masukkan style CSS nanti untuk jadikan antaramuka lebih cantik dan lembut -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Sistem Relief 🎀</h2>
-        <ul>
-            <li><a href="#" class="active">Senarai Guru</a></li>
-            <li><a href="#">Jadual Waktu</a></li>
-            <li><a href="#">Cuti & Ketidakhadiran</a></li>
-            <li><a href="#">Jana Guru Ganti</a></li>
-        </ul>
-    </div>
-
-    <div class="main-content">
-        <header>
-            <h1>Pengurusan Guru Ganti</h1>
-            <p>Urus jadual dan relif guru dengan mudah dan pantas.</p>
-        </header>
-
-         <section class="card" id="senarai-guru-section">
-            <h3>Senarai & Tambah Guru 🌸</h3>
-            
-            <!-- Borang Tambah Guru -->
-            <form id="add-teacher-form">
-                <input type="text" id="teacher-name" placeholder="Nama Guru (Cth: Cikgu Ali)" required>
-                <input type="number" id="max-waktu" placeholder="Max Waktu Sehari (Cth: 6)" value="6" required>
-                <button type="submit">Tambah Guru ✨</button>
-            </form>
-
-            <!-- Jadual Paparan Guru -->
-            <div class="table-responsive">
-                <table id="teacher-table">
-                    <thead>
-                        <tr>
-                            <th>Nama Guru</th>
-                            <th>Max Waktu Sehari</th>
-                            <th>Tindakan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="teacher-list">
-                        <!-- Data dari Supabase akan dipaparkan di sini -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
+    <h1>Sistem Pengurusan Guru Ganti</h1>
+    
+    <!-- Bahagian untuk papar output dari database -->
+    <div id="app"></div>
 
     <script src="app.js"></script>
 </body>
